@@ -1,0 +1,18 @@
+Skip to content
+
+public-apis/public-apisPublic
+
+CodeIssues3Pull requests9ActionsSecurityInsights
+
+ master 
+
+public-apis/scripts/validate/format.py
+
+matheusfelipeog  columns in error message" class="Link--secondary" href="https://github.com/public-apis/public-apis/commit/7d9eac49202db40f11bb7f20f3aafc4b4eec0667" style="box-sizing: border-box; background-color: transparent; color: var(--color-fg-muted) !important; text-decoration: none;">Change sections -> columns in error message
+
+ 1 contributor
+
+277 lines (192 sloc)  8.27 KB
+
+# -*- coding: utf-8 -*- import reimport sysfrom string import punctuationfrom typing import List, Tuple, Dict # Temporary replacement# The descriptions that contain () at the end must adapt to the new policy laterpunctuation = punctuation.replace('()', '') anchor = '###'auth_keys = ['apiKey', 'OAuth', 'X-Mashape-Key', 'User-Agent', 'No']https_keys = ['Yes', 'No']cors_keys = ['Yes', 'No', 'Unknown'] index_title = 0index_desc = 1index_auth = 2index_https = 3index_cors = 4 num_segments = 5min_entries_per_category = 3max_description_length = 100 anchor_re = re.compile(anchor + '\s(.+)')category_title_in_index_re = re.compile('\*\s\[(.*)\]')link_re = re.compile('\[(.+)\]\((http.*)\)') # Type aliasesAPIList = List[str]Categories = Dict[str, APIList]CategoriesLineNumber = Dict[str, int] def error_message(line_number: int, message: str) -> str: line = line_number + 1 return f'(L{line:03d}) {message}' def get_categories_content(contents: List[str]) -> Tuple[Categories, CategoriesLineNumber]: categories = {} category_line_num = {} for line_num, line_content in enumerate(contents): if line_content.startswith(anchor): category = line_content.split(anchor)[1].strip() categories[category] = [] category_line_num[category] = line_num continue if not line_content.startswith('|') or line_content.startswith('|---'): continue raw_title = [ raw_content.strip() for raw_content in line_content.split('|')[1:-1] ][0] title_match = link_re.match(raw_title) if title_match: title = title_match.group(1).upper() categories[category].append(title) return (categories, category_line_num) def check_alphabetical_order(lines: List[str]) -> List[str]: 
+
